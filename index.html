@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            background: #e5e7eb;
+            border: none;
+            border-radius: 0.25rem;
+        }
+
+        .tab.active {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .grid {
+            display: grid;
+            gap: 0.5rem;
+            padding: 1rem;
+            max-width: 95vw;
+            margin: 1rem auto;
+        }
+
+        .dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #CBD5E1;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .dot.error {
+            background-color: transparent;
+        }
+
+        .dot.success {
+            background-color: #10B981;
+        }
+
+        .dot:hover {
+            transform: scale(1.1);
+        }
+
+        .dot.playing {
+            background-color: #3B82F6;
+            transform: scale(1.1);
+        }
+
+        #loadingStatus {
+            text-align: center;
+            margin: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="tabs" id="tabs"></div>
+    <div id="loadingStatus">Loading audio files...</div>
+    <div class="grid" id="audioGrid"></div>
+
+    <script>
+        const configs = {
+            "Racing car": { path: "public/website/racing_car", rows: 27, columns: 27 },
+            "Whistle": { path: "public/website/whistle", rows: 27, columns: 27 },
+            "Do": { path: "public/website/DO_300_dynamic_seed25", rows: 27, columns: 27 }
+        };
+
+        class AudioGrid {
+            constructor(config) {
+                this.config = config;
+                this.audios = new Map();
+                this.dots = new Map();
+                this.loadedFiles = 0;
+                this.totalFiles = config.rows * config.columns;
+                this.init();
+            }
+
+            getKey(row, col) { return `${row}_${col}`; }
+
+            updateLoadingStatus() {
+                const percentage = Math.floor((this.loadedFiles / this.totalFiles) * 100);
+                document.getElementById('loadingStatus').textContent =
+                    `Loading: ${this.loadedFiles}/${this.totalFiles} (${percentage}%)`;
+            }
+
+            async loadAudio(row, col) {
+                const key = this.getKey(row, col);
+                const audio = new Audio(`${this.config.path}/${key}.wav`);
+                const dot = this.dots.get(key);
+
+                try {
+                    await new Promise((resolve, reject) => {
+                        audio.addEventListener('loadeddata', resolve);
+                        audio.addEventListener('error', reject);
+                    });
+                    dot.classList.add('success');
+                    this.audios.set(key, audio);
+                    this.loadedFiles++;
+                    this.updateLoadingStatus();
+                } catch (err) {
+                    dot.classList.add('error');
+                    console.log(`Error loading ${key}.wav`);
+                }
+            }
+
+            clear() {
+                this.audios.forEach(audio => audio.pause());
+                this.audios.clear();
+                this.dots.clear();
+                document.getElementById('audioGrid').innerHTML = '';
+            }
+
+            async init() {
+                const grid = document.getElementById('audioGrid');
+                grid.style.gridTemplateColumns = `repeat(${this.config.columns}, 30px)`;
+
+                for (let row = 0; row < this.config.rows; row++) {
+                    for (let col = 0; col < this.config.columns; col++) {
+                        const dot = document.createElement('button');
+                        const key = this.getKey(row, col);
+
+                        dot.className = 'dot';
+                        dot.setAttribute('aria-label', `Sound ${row},${col}`);
+                        dot.addEventListener('click', () => this.playSound(row, col));
+
+                        this.dots.set(key, dot);
+                        grid.appendChild(dot);
+                    }
+                }
+
+                await Promise.all(Array.from({ length: this.config.rows }, (_, row) =>
+                    Array.from({ length: this.config.columns }, (_, col) =>
+                        this.loadAudio(row, col))
+                ).flat());
+
+                document.getElementById('loadingStatus').textContent = ' ';
+            }
+
+            playSound(row, col) {
+                const key = this.getKey(row, col);
+                const audio = this.audios.get(key);
+                if (!audio) return;
+
+                this.audios.forEach(a => {
+                    a.pause();
+                    a.currentTime = 0;
+                });
+                this.dots.forEach(dot => dot.classList.remove('playing'));
+
+                audio.play().catch(console.error);
+                const dot = this.dots.get(key);
+                dot.classList.add('playing');
+
+                audio.onended = () => {
+                    dot.classList.remove('playing');
+                    dot.classList.add('success');
+                };
+            }
+        }
+
+        let currentGrid = null;
+
+        function switchTab(name) {
+            document.querySelectorAll('.tab').forEach(tab =>
+                tab.classList.toggle('active', tab.textContent === name));
+
+            if (currentGrid) currentGrid.clear();
+            document.getElementById('loadingStatus').textContent = 'Loading audio files...';
+            currentGrid = new AudioGrid(configs[name]);
+        }
+
+        Object.keys(configs).forEach((name, index) => {
+            const tab = document.createElement('button');
+            tab.className = `tab${index === 0 ? ' active' : ''}`;
+            tab.textContent = name;
+            tab.addEventListener('click', () => switchTab(name));
+            document.getElementById('tabs').appendChild(tab);
+        });
+
+        switchTab(Object.keys(configs)[0]);
+    </script>
+</body>
+
+</html>
