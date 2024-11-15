@@ -175,6 +175,14 @@
 
 <body>
     <div class="container">
+        <h1>Demo page for <i>"Applying Quality and Diversity Optimization
+        with Multimodal Embeddings to an Articulatory
+        Vocal Model"</i></h1>
+        <p>
+            The following page demonstrates the result of a quality and diversity optimization algorithm applied to a vocal model.
+            The objective is to follow a text prompt. 
+            We showcase the results from three different prompts: "Sound of a cat meowing", "Sound of a racing car", and "Sound of a whistle".
+        </p>
         <div class="controls">
            
         </div>
@@ -193,23 +201,29 @@
                     <span class="colorbar-label" style="top: 50%;">0.5</span>
                     <span class="colorbar-label" style="bottom: 0;">0.0</span>
                 </div>
-                <div style="margin-top: 10px; font-family: Arial, sans-serif; font-size: 14px;">Intensity</div>
+                <div style="margin-top: 10px; font-family: Arial, sans-serif; font-size: 14px;">Objective score</div>
             </div>
         </div>
     </div>
-    <script src="cat.js"></script>
+    <script src="data.js"></script>
     <script>
         const pages = {
             "cat": {
                 "audioPath": "public/website/sound_of_a_cat_meowing/",
                 "caption": "Sound of a cat meowing",
-                "intensityMap": catIntensityMap
+                "intensityMap": cat
             },
-            // "racing_car": {
-            //     "audioPath": "public/website/racing_car/",
-            //     "caption": "Sound of a racing car",
-            //     "intensityMap": racingCarIntensityMap
-            // }
+            "racing car": {
+                "audioPath": "public/website/racing_car/",
+                "caption": "Sound of a racing car",
+                "intensityMap": car
+            },
+            "whistle":
+            {
+                "audioPath": "public/website/whistle/",
+                "caption": "Sound of a whistle",
+                "intensityMap": whistle
+            }
         };
 
         function magmaColor(value) {
