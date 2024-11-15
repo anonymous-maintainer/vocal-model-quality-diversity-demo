@@ -285,14 +285,16 @@
             for (const [filename, intensity] of Object.entries(pages[page].intensityMap)) {
                 const [x, y] = filename.split('.')[0].split('_').map(Number);
                 const dot = document.createElement('div');
-                const audio = new Audio(`${pages[page].audioPath}${filename}`);
 
                 dot.className = 'dot';
                 dot.style.backgroundColor = magmaColor(intensity);
                 dot.style.gridColumn = y + 1;
                 dot.style.gridRow = x + 1;
 
+                var audio = null;
+
                 dot.addEventListener('click', () => {
+                    audio = new Audio(`${pages[page].audioPath}${filename}`);
                     audio.currentTime = 0;
                     audio.play();
                 });
