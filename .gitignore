@@ -2,3 +2,4 @@
 .DS_Store
 # recursively ignore
 **/.DS_Store
+.gitconfig
