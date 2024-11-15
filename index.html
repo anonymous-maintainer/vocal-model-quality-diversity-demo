@@ -5,7 +5,7 @@
     <style>
         .container {
             position: relative;
-            margin: 100px;
+            margin: 64px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -180,7 +180,7 @@
         Vocal Model"</i></h1>
         <p>
             The following page demonstrates the result of a quality and diversity optimization algorithm applied to a vocal model.
-            The objective is to follow a text prompt. 
+            The objective is to follow a text prompt.
             We showcase the results from three different prompts: "Sound of a cat meowing", "Sound of a racing car", and "Sound of a whistle".
         </p>
         <div class="controls">
@@ -189,10 +189,10 @@
         <div id="caption" class="caption"></div>
         <div class="plot-container">
             <div class="axis">
-                <div class="axis-label y-label">measure space dimension #1</div>
+                <div class="axis-label y-label">measure space dimension #2</div>
             </div>
             <div class="x-axis">
-                <div class="axis-label x-label">measure space dimension #2</div>
+                <div class="axis-label x-label">measure space dimension #1</div>
             </div>
             <div id="grid" class="grid"></div>
             <div class="colorbar-container">
@@ -208,21 +208,26 @@
     <script src="data.js"></script>
     <script>
         const pages = {
-            "cat": {
+            "Prompt: cat": {
                 "audioPath": "public/website/sound_of_a_cat_meowing/",
-                "caption": "Sound of a cat meowing",
+                "caption": "Prompt: Sound of a cat meowing",
                 "intensityMap": cat
             },
-            "racing car": {
+            "Prompt: racing car": {
                 "audioPath": "public/website/racing_car/",
-                "caption": "Sound of a racing car",
+                "caption": "Prompt: Sound of a racing car",
                 "intensityMap": car
             },
-            "whistle":
+            "Prompt: whistle":
             {
                 "audioPath": "public/website/whistle/",
-                "caption": "Sound of a whistle",
+                "caption": "Prompt: Sound of a whistle",
                 "intensityMap": whistle
+            },
+            "Diversity optimization only": {
+                "audioPath": "public/website/DO_300_dynamic_seed25/website_audio/",
+                "caption": "Here we did diversity optimization only, without quality optimization.",
+                "intensityMap": diversity
             }
         };
 
@@ -294,6 +299,13 @@
 
                 grid.appendChild(dot);
             }
+
+            // if page is "diversity optimization only", hide the colorbar
+            if (page === "Diversity optimization only") {
+                document.querySelector('.colorbar-container').style.opacity = 0;
+            } else {
+                document.querySelector('.colorbar-container').style.opacity = 1;
+            }
         }
 
         function changePage(page) {
@@ -301,7 +313,7 @@
         }
         addPageButtons();
         // Initialize with cat page
-        changePage('cat');
+        changePage('Prompt: cat');
     </script>
 </body>
 
