@@ -241,12 +241,17 @@
             .domain(state.domain);
 
         // Update function
+        // Update function
         function update(page) {
             const pageData = state.pages[page];
             state.currentPage = page;
 
             // Update caption
             d3.select("#caption").text(pageData.caption);
+
+            // Show/hide colorbar based on the selected page
+            d3.select("#colorbar")
+                .style("display", page === "Diversity optimization only" ? "none" : "block");
 
             // Create grid data
             const cellWidth = state.width / state.gridSize;
@@ -277,7 +282,10 @@
                 .attr("y", d => d.y)
                 .attr("width", d => d.width)
                 .attr("height", d => d.height)
-                .style("fill", d => d.value ? color(d.value) : "white")
+                .style("fill", d => {
+                    if (!d.value) return "white";
+                    return page === "Diversity optimization only" ? "#808080" : color(d.value);
+                })
                 .style("cursor", d => d.audio ? "pointer" : "default")
                 .on("click", (event, d) => {
                     if (!d.audio) return;
