@@ -79,13 +79,13 @@
         <p>The following page demonstrates the result of a quality and diversity optimization algorithm applied to a
             vocal model.
             <br>
-            The loss used is squared euclidean CLAP distance to a text prompt.
+            The loss used is negative squared euclidean CLAP distance to a text prompt.
             <br>
             We showcase the results from three
             different text prompts:
             "Sound of a cat meowing", "Sound of a racing car", and "Sound of a whistle".
             <br>
-            We also showcase the results from diversity optimization only, without any loss/objective.
+            We also showcase the results from diversity optimization only, without any loss/objective, once both for the static case (one single articulatory target position) and the dynamic case (three articulatory target positions).
         </p>
         <div class="controls"></div>
         <div id="caption" class="caption"></div>
@@ -120,10 +120,15 @@
                     caption: "Prompt: 'Sound of a whistle'",
                     intensityMap: whistle
                 },
-                "Diversity optimization only": {
-                    audioPath: "public/website/DO/",
-                    caption: "Diversity optimization only, no loss/objective",
-                    intensityMap: diversity
+                "Diversity optimization only (dynamic)": {
+                    audioPath: "public/website/DO/dynamic/",
+                    caption: "Diversity optimization only, no loss/objective, three articulatory target positions",
+                    intensityMap: diversity_dynamic
+                },
+                "Diversity optimization only (static)": {
+                    audioPath: "public/website/DO/static/",
+                    caption: "Diversity optimization only, no loss/objective, one single articulatory target position",
+                    intensityMap: diversity_static
                 }
             }
         };
@@ -235,24 +240,26 @@
             .attr("class", "colorbar-label")
             .attr("text-anchor", "middle")
             .attr("transform", `translate(${colorbarWidth + 45}, ${colorbarHeight / 2}) rotate(-90)`)
-            .text("Squared euclidean CLAP distance");
+            .text("Negative squared euclidean CLAP distance");
 
         // Set up color scale for heatmap
         const color = d3.scaleSequential(d3.interpolateMagma)
             .domain(state.domain);
 
         // Update function
-        // Update function
         function update(page) {
             const pageData = state.pages[page];
             state.currentPage = page;
+
+            // Determine if the selected page is a Diversity Optimization page
+            const isDiversityOptimization = page.includes("Diversity optimization only");
 
             // Update caption
             d3.select("#caption").text(pageData.caption);
 
             // Show/hide colorbar based on the selected page
             d3.select("#colorbar")
-                .style("display", page === "Diversity optimization only" ? "none" : "block");
+                .style("display", isDiversityOptimization ? "none" : "block");
 
             // Create grid data
             const cellWidth = state.width / state.gridSize;
@@ -285,7 +292,7 @@
                 .attr("height", d => d.height)
                 .style("fill", d => {
                     if (!d.value) return "white";
-                    return page === "Diversity optimization only" ? "#808080" : color(d.value);
+                    return isDiversityOptimization ? "#808080" : color(d.value);
                 })
                 .style("cursor", d => d.audio ? "pointer" : "default")
                 .on("click", (event, d) => {
